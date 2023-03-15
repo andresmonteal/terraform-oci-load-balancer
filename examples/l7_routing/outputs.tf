@@ -8,9 +8,9 @@ output "lb" {
 }
 
 output "backend_sets" {
-  value       = module.oci_lb.backend_sets
+  value = module.oci_lb.backend_sets
 }
 
 output "listeners" {
-  value       = module.oci_lb.listeners
+  value = module.oci_lb.listeners
 }

@@ -3,5 +3,5 @@
 
 output "lb" {
   description = "LB"
-   value       = "created"
+  value       = "created"
 }

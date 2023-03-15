@@ -35,15 +35,15 @@ resource "oci_load_balancer_load_balancer" "this" {
   defined_tags               = var.lb_options.defined_tags != null ? var.lb_options.defined_tags : local.lb_options_defaults.defined_tags
   freeform_tags              = local.merged_freeform_tags
 
-    dynamic "shape_details" {
-      #Required if shape = flexible
-      for_each = var.lb_options.shape == "flexible" ? [1] : []
+  dynamic "shape_details" {
+    #Required if shape = flexible
+    for_each = var.lb_options.shape == "flexible" ? [1] : []
 
-        content {
-          maximum_bandwidth_in_mbps = lookup(var.lb_options.shape_details, "max_bandwidth", "")
-          minimum_bandwidth_in_mbps = lookup(var.lb_options.shape_details, "min_bandwidth","")
-        }
+    content {
+      maximum_bandwidth_in_mbps = lookup(var.lb_options.shape_details, "max_bandwidth", "")
+      minimum_bandwidth_in_mbps = lookup(var.lb_options.shape_details, "min_bandwidth", "")
     }
+  }
 }
 
 #################
@@ -436,23 +436,23 @@ resource "oci_load_balancer_backend" "this" {
 }
 */
 
-  be_servers            = flatten( [ for k,v in var.backend_sets : [ for k2,v2 in v.backends : { bes=k, name=k2, ip_address=v2.ip, port=v2.port, backup=v2.backup, drain=v2.drain, offline=v2.offline, weight=v2.weight } ] ] )
+  be_servers = flatten([for k, v in var.backend_sets : [for k2, v2 in v.backends : { bes = k, name = k2, ip_address = v2.ip, port = v2.port, backup = v2.backup, drain = v2.drain, offline = v2.offline, weight = v2.weight }]])
 }
 
 # resource definition
 resource "oci_load_balancer_backend" "this" {
-  count                 = length(local.be_servers)
-  depends_on            = [ oci_load_balancer_backend_set.this_no_persistency_no_ssl, oci_load_balancer_backend_set.this_no_persistency_ssl, oci_load_balancer_backend_set.this_persistency_no_ssl, oci_load_balancer_backend_set.this_persistency_ssl ]
+  count      = length(local.be_servers)
+  depends_on = [oci_load_balancer_backend_set.this_no_persistency_no_ssl, oci_load_balancer_backend_set.this_no_persistency_ssl, oci_load_balancer_backend_set.this_persistency_no_ssl, oci_load_balancer_backend_set.this_persistency_ssl]
 
-  load_balancer_id      = oci_load_balancer_load_balancer.this[0].id
-  backendset_name       = local.be_servers[count.index].bes != null ? local.be_servers[count.index].bes : "${local.backends_defaults.name}${count.index}"
-  ip_address            = local.be_servers[count.index].ip_address != null ? local.be_servers[count.index].ip_address : local.backends_defaults.ip_address
-  port                  = local.be_servers[count.index].port != null ? local.be_servers[count.index].port : local.backends_defaults.port
+  load_balancer_id = oci_load_balancer_load_balancer.this[0].id
+  backendset_name  = local.be_servers[count.index].bes != null ? local.be_servers[count.index].bes : "${local.backends_defaults.name}${count.index}"
+  ip_address       = local.be_servers[count.index].ip_address != null ? local.be_servers[count.index].ip_address : local.backends_defaults.ip_address
+  port             = local.be_servers[count.index].port != null ? local.be_servers[count.index].port : local.backends_defaults.port
 
-  backup                = local.be_servers[count.index].backup != null ? local.be_servers[count.index].backup : local.backends_defaults.backup
-  drain                 = local.be_servers[count.index].drain != null ? local.be_servers[count.index].drain : local.backends_defaults.drain
-  offline               = local.be_servers[count.index].offline != null ? local.be_servers[count.index].offline : local.backends_defaults.offline
-  weight                = local.be_servers[count.index].weight != null ? local.be_servers[count.index].weight : local.backends_defaults.weight
+  backup  = local.be_servers[count.index].backup != null ? local.be_servers[count.index].backup : local.backends_defaults.backup
+  drain   = local.be_servers[count.index].drain != null ? local.be_servers[count.index].drain : local.backends_defaults.drain
+  offline = local.be_servers[count.index].offline != null ? local.be_servers[count.index].offline : local.backends_defaults.offline
+  weight  = local.be_servers[count.index].weight != null ? local.be_servers[count.index].weight : local.backends_defaults.weight
 }
 
 

@@ -22,77 +22,77 @@ output "lb_shapes" {
 
 output "certificates" {
   description = "Certificates created/managed."
-  value       = {
-    for x in oci_load_balancer_certificate.this:
-      x.certificate_name => x
+  value = {
+    for x in oci_load_balancer_certificate.this :
+    x.certificate_name => x
   }
 }
 
 output "backend_sets" {
   description = "All of the Backend Sets created/managed."
-  value       = merge(
+  value = merge(
     {
-      for x in oci_load_balancer_backend_set.this_no_persistency_no_ssl:
-        x.name => merge( x, { backends = [ for i in oci_load_balancer_backend.this : i if i.backendset_name == x.name ] } )
+      for x in oci_load_balancer_backend_set.this_no_persistency_no_ssl :
+      x.name => merge(x, { backends = [for i in oci_load_balancer_backend.this : i if i.backendset_name == x.name] })
     },
     {
-      for x in oci_load_balancer_backend_set.this_no_persistency_ssl:
-        x.name => merge( x, { backends = [ for i in oci_load_balancer_backend.this : i if i.backendset_name == x.name ] } )
+      for x in oci_load_balancer_backend_set.this_no_persistency_ssl :
+      x.name => merge(x, { backends = [for i in oci_load_balancer_backend.this : i if i.backendset_name == x.name] })
     },
     {
-      for x in oci_load_balancer_backend_set.this_persistency_no_ssl:
-        x.name => merge( x, { backends = [ for i in oci_load_balancer_backend.this : i if i.backendset_name == x.name ] } )
+      for x in oci_load_balancer_backend_set.this_persistency_no_ssl :
+      x.name => merge(x, { backends = [for i in oci_load_balancer_backend.this : i if i.backendset_name == x.name] })
     },
     {
-      for x in oci_load_balancer_backend_set.this_persistency_ssl:
-        # x.name => x
-        x.name => merge( x, { backends = [ for i in oci_load_balancer_backend.this : i if i.backendset_name == x.name ] } )
+      for x in oci_load_balancer_backend_set.this_persistency_ssl :
+      # x.name => x
+      x.name => merge(x, { backends = [for i in oci_load_balancer_backend.this : i if i.backendset_name == x.name] })
     }
   )
 }
 
 output "backends" {
   description = "Backends created/managed."
-  value       = {
-    for x in oci_load_balancer_backend.this:
-      "${x.ip_address}_${x.port}" => x
+  value = {
+    for x in oci_load_balancer_backend.this :
+    "${x.ip_address}_${x.port}" => x
   }
 }
 
 output "path_route_sets" {
   description = "Path Route Sets created/managed."
-  value       = {
-    for x in oci_load_balancer_path_route_set.this:
-      x.name => x
+  value = {
+    for x in oci_load_balancer_path_route_set.this :
+    x.name => x
   }
 }
 
 output "rule_sets" {
   description = "Rule Sets created/managed."
-  value       = {
-    for x in oci_load_balancer_rule_set.this:
-      x.name => x
+  value = {
+    for x in oci_load_balancer_rule_set.this :
+    x.name => x
   }
 }
 
 output "listeners" {
   description = "All of the Listeners created/managed."
-  value       = merge(
+  value = merge(
     {
-      for x in oci_load_balancer_listener.this_no_ssl:
-        x.name => merge( x, { hostnames = concat( [ for i in oci_load_balancer_hostname.this : i.hostname if i.name == "${x.name}_${i.hostname}" ] ) } )
+      for x in oci_load_balancer_listener.this_no_ssl :
+      x.name => merge(x, { hostnames = concat([for i in oci_load_balancer_hostname.this : i.hostname if i.name == "${x.name}_${i.hostname}"]) })
     },
     {
-      for x in oci_load_balancer_listener.this_ssl:
-        x.name => merge( x, { hostnames = concat( [ for i in oci_load_balancer_hostname.this : i.hostname if i.name == "${x.name}_${i.hostname}" ] ) } )
+      for x in oci_load_balancer_listener.this_ssl :
+      x.name => merge(x, { hostnames = concat([for i in oci_load_balancer_hostname.this : i.hostname if i.name == "${x.name}_${i.hostname}"]) })
     }
   )
 }
 
 output "hostnames" {
   description = "Hostnames created/managed."
-  value       = {
-    for x in oci_load_balancer_hostname.this:
-      x.name => x
+  value = {
+    for x in oci_load_balancer_hostname.this :
+    x.name => x
   }
 }
