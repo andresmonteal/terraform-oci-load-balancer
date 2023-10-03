@@ -124,8 +124,15 @@ variable "listeners" {
     enable_ssl               = bool,
     certificate_name         = string,
     verify_depth             = number,
-    verify_peer_certificate  = bool
+    verify_peer_certificate  = bool,
+    routing_policy_name      = string
   }))
   description = "Parameters for Listeners."
   default     = {}
+}
+
+variable "routing_policies" {
+  type        = map(any)
+  default     = {}
+  description = " Parameters for routing policies"
 }

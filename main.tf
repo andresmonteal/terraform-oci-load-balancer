@@ -545,6 +545,7 @@ locals {
     certificate_name        = null
     verify_depth            = 3
     verify_peer_certificate = true
+    routing_policy_name     = ""
   }
 
   listeners_no_ssl = { for k, v in var.listeners :
@@ -557,6 +558,7 @@ locals {
       hostnames                = [for i in(v.hostnames != null ? v.hostnames : local.listeners_defaults.hostnames) : "${k}_${i}"]
       path_route_set_name      = v.path_route_set_name
       rule_set_names           = v.rule_set_names
+      routing_policy_name      = v.routing_policy_name
     } if v.enable_ssl != true
   }
   listeners_no_ssl_keys = keys(local.listeners_no_ssl)
@@ -575,6 +577,7 @@ locals {
       certificate_name         = v.certificate_name
       verify_depth             = v.verify_depth
       verify_peer_certificate  = v.verify_peer_certificate
+      routing_policy_name      = v.routing_policy_name
     } if v.enable_ssl == true
   }
   listeners_ssl_keys = keys(local.listeners_ssl)
@@ -591,6 +594,7 @@ resource "oci_load_balancer_listener" "this_no_ssl" {
   name                     = local.listeners_no_ssl_keys[count.index] != null ? local.listeners_no_ssl_keys[count.index] : "${local.listeners_defaults.name}${count.index}"
   port                     = local.listeners_no_ssl[local.listeners_no_ssl_keys[count.index]].port != null ? local.listeners_no_ssl[local.listeners_no_ssl_keys[count.index]].port : local.listeners_defaults.port
   protocol                 = local.listeners_no_ssl[local.listeners_no_ssl_keys[count.index]].protocol != null ? local.listeners_no_ssl[local.listeners_no_ssl_keys[count.index]].protocol : local.listeners_defaults.protocol
+  routing_policy_name      = local.listeners_no_ssl[local.listeners_no_ssl_keys[count.index]].routing_policy_name
 
   connection_configuration {
     idle_timeout_in_seconds = local.listeners_no_ssl[local.listeners_no_ssl_keys[count.index]].idle_timeout != null ? local.listeners_no_ssl[local.listeners_no_ssl_keys[count.index]].idle_timeout : local.listeners_defaults.idle_timeout
@@ -610,6 +614,7 @@ resource "oci_load_balancer_listener" "this_ssl" {
   name                     = local.listeners_ssl_keys[count.index] != null ? local.listeners_ssl_keys[count.index] : "${local.listeners_defaults.name}${count.index}"
   port                     = local.listeners_ssl[local.listeners_ssl_keys[count.index]].port != null ? local.listeners_ssl[local.listeners_ssl_keys[count.index]].port : local.listeners_defaults.port
   protocol                 = local.listeners_ssl[local.listeners_ssl_keys[count.index]].protocol != null ? local.listeners_ssl[local.listeners_ssl_keys[count.index]].protocol : local.listeners_defaults.protocol
+  routing_policy_name      = local.listeners_ssl[local.listeners_ssl_keys[count.index]].routing_policy_name
 
   connection_configuration {
     idle_timeout_in_seconds = local.listeners_ssl[local.listeners_ssl_keys[count.index]].idle_timeout != null ? local.listeners_ssl[local.listeners_ssl_keys[count.index]].idle_timeout : local.listeners_defaults.idle_timeout
@@ -643,4 +648,45 @@ resource "oci_load_balancer_hostname" "this" {
   load_balancer_id = oci_load_balancer_load_balancer.this[0].id
   name             = local.hostnames[count.index].name != null ? local.hostnames[count.index].name : "${local.hostnames_defaults.name}${count.index}"
   hostname         = local.hostnames[count.index].hostname != null ? local.hostnames[count.index].hostname : local.hostnames_defaults.hostname
+}
+
+
+#################
+# Routing Policies
+#################
+# This resource provides the Load Balancer Routing Policy resource in Oracle Cloud Infrastructure Load Balancer service.
+
+resource "oci_load_balancer_load_balancer_routing_policy" "this" {
+  for_each = var.routing_policies
+
+  #Required
+  condition_language_version = "V1"
+  load_balancer_id           = oci_load_balancer_load_balancer.this[0].id
+  name                       = each.key
+
+  dynamic "rules" {
+    for_each = each.value["rules"]
+
+    content {
+      #Required
+      actions {
+        #Required
+        backend_set_name = rules.value["backend_set_name"]
+        name             = "FORWARD_TO_BACKENDSET"
+      }
+      condition = rules.value["condition"]
+      name      = rules.key
+    }
+  }
+
+  timeouts {
+    create = "20m"
+    update = "20m"
+    delete = "20m"
+  }
+
+  depends_on = [oci_load_balancer_backend_set.this_no_persistency_no_ssl,
+    oci_load_balancer_backend_set.this_no_persistency_ssl,
+    oci_load_balancer_backend_set.this_persistency_no_ssl,
+  oci_load_balancer_backend_set.this_persistency_ssl]
 }
