@@ -28,36 +28,36 @@ output "certificates" {
   }
 }
 
-output "backend_sets" {
-  description = "All of the Backend Sets created/managed."
-  value = merge(
-    {
-      for x in oci_load_balancer_backend_set.this_no_persistency_no_ssl :
-      x.name => merge(x, { backends = [for i in oci_load_balancer_backend.this : i if i.backendset_name == x.name] })
-    },
-    {
-      for x in oci_load_balancer_backend_set.this_no_persistency_ssl :
-      x.name => merge(x, { backends = [for i in oci_load_balancer_backend.this : i if i.backendset_name == x.name] })
-    },
-    {
-      for x in oci_load_balancer_backend_set.this_persistency_no_ssl :
-      x.name => merge(x, { backends = [for i in oci_load_balancer_backend.this : i if i.backendset_name == x.name] })
-    },
-    {
-      for x in oci_load_balancer_backend_set.this_persistency_ssl :
-      # x.name => x
-      x.name => merge(x, { backends = [for i in oci_load_balancer_backend.this : i if i.backendset_name == x.name] })
-    }
-  )
-}
+# output "backend_sets" {
+#   description = "All of the Backend Sets created/managed."
+#   value = merge(
+#     {
+#       for x in oci_load_balancer_backend_set.this_no_persistency_no_ssl :
+#       x.name => merge(x, { backends = [for i in oci_load_balancer_backend.this : i if i.backendset_name == x.name] })
+#     },
+#     {
+#       for x in oci_load_balancer_backend_set.this_no_persistency_ssl :
+#       x.name => merge(x, { backends = [for i in oci_load_balancer_backend.this : i if i.backendset_name == x.name] })
+#     },
+#     {
+#       for x in oci_load_balancer_backend_set.this_persistency_no_ssl :
+#       x.name => merge(x, { backends = [for i in oci_load_balancer_backend.this : i if i.backendset_name == x.name] })
+#     },
+#     {
+#       for x in oci_load_balancer_backend_set.this_persistency_ssl :
+#       # x.name => x
+#       x.name => merge(x, { backends = [for i in oci_load_balancer_backend.this : i if i.backendset_name == x.name] })
+#     }
+#   )
+# }
 
-output "backends" {
-  description = "Backends created/managed."
-  value = {
-    for x in oci_load_balancer_backend.this :
-    "${x.ip_address}_${x.port}" => x
-  }
-}
+# output "backends" {
+#   description = "Backends created/managed."
+#   value = {
+#     for x in oci_load_balancer_backend.this :
+#     "${x.ip_address}_${x.port}" => x
+#   }
+# }
 
 output "path_route_sets" {
   description = "Path Route Sets created/managed."

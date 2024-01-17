@@ -440,7 +440,9 @@ resource "oci_load_balancer_backend" "this" {
 }
 
 # resource definition
-resource "oci_load_balancer_backend" "this" {
+#resource "oci_load_balancer_backend" "this" {
+module "backend" {
+  source     = "./backend"
   count      = length(local.be_servers)
   depends_on = [oci_load_balancer_backend_set.this_no_persistency_no_ssl, oci_load_balancer_backend_set.this_no_persistency_ssl, oci_load_balancer_backend_set.this_persistency_no_ssl, oci_load_balancer_backend_set.this_persistency_ssl]
 
