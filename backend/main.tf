@@ -4,7 +4,7 @@ locals {
   load_balancer_id = try(data.oci_load_balancer_load_balancers.this[0].load_balancers[0].id, var.load_balancer_id)
 }
 
-resource "oci_load_balancer_backend" "test_backend" {
+resource "oci_load_balancer_backend" "backend" {
   #Required
   backendset_name  = var.backendset_name
   ip_address       = var.ip_address
